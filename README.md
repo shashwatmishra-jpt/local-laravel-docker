@@ -80,7 +80,11 @@ docker exec -it marketplace2-core sh
 Instead of going inside the container interactively every time, then running the desired command, You can use command `jpt` to run commands directly:
 
 ```sh
-jpt core php artisan about
+jpt core artisan about
+# OR
+jpt core composer install
+# OR
+jpt core yarn
 ```
 
 Where `core` is the container (i.e. `marketplace2-core`) followed by the command that you want to run on that container.
@@ -97,4 +101,76 @@ chmod +x ./jpt_command.sh
 ```sh
 echo -e "\n# JPT Command\nsource $PWD/jpt_command.sh" >> ~/.bashrc
 source ~/.bashrc
+```
+
+### Commands:
+
+1. Docker compose up
+
+Proxied: `docker compose up -d --build --remove-orphans`
+
+```sh
+jpt up
+```
+
+2. Docker compose down
+
+Proxied: `docker compose down`
+
+```sh
+jpt down
+```
+
+3. PHP Artisan Commands
+
+Proxied: `docker compose -it exec marketplace2-core php artisan about`
+
+```sh
+jpt core artisan about
+```
+
+4. Composer Commands
+
+Proxied: `docker compose -it exec marketplace2-core composer install`
+
+```sh
+jpt core composer install
+```
+
+5. Yarn Commands
+
+Proxied: `docker compose -it exec marketplace2-core yarn`
+
+```sh
+jpt core yarn
+```
+
+Proxied: `docker compose -it exec marketplace2-core yarn dev`
+
+```sh
+jpt core yarn dev
+```
+
+>(!) Note: The supervisor (worker) container already keep an instance on `yarn dev` running.
+
+6. PHP Unit
+
+Proxied: `docker compose -it exec marketplace2-core ./vendor/bin/phpunit`
+
+```sh
+jpt core unit
+```
+
+OR
+
+```sh
+jpt core phpunit
+```
+
+7. Pint
+
+Proxied: `docker compose -it exec marketplace2-core ./vendor/bin/pint`
+
+```sh
+jpt core pint
 ```
