@@ -31,6 +31,15 @@ services:
         image: diamondicq/worker
         container_name: marketplace2-worker
         restart: unless-stopped
+        environment:
+            YARN_DEV_ONSTART: ${YARN_DEV_ONSTART:-true}
+            YARN_DEV_RESTART: ${YARN_DEV_RESTART:-true}
+            SCHEDULE_WORKER_ONSTART: ${SCHEDULE_WORKER_ONSTART:-true}
+            SCHEDULE_WORKER_RESTART: ${SCHEDULE_WORKER_RESTART:-true}
+            QUEUE_WORKER_ONSTART: ${QUEUE_WORKER_ONSTART:-true}
+            QUEUE_WORKER_RESTART: ${QUEUE_WORKER_RESTART:-true}
+            HORIZON_ONSTART: ${HORIZON_ONSTART:-true}
+            HORIZON_RESTART: ${HORIZON_RESTART:-true}
         volumes:
             - 'marketplace2-backend:/var/www/html'
         networks:

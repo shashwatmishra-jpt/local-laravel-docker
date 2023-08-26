@@ -1,5 +1,5 @@
 # Bash Functions
-jpt () {
+jpt_service () {
 
     if [[ "$1" == "up" || "$1" == "u" ]]; then
         docker_cmd=(docker)
@@ -10,6 +10,11 @@ jpt () {
         docker_cmd=(docker)
         service=(compose)
         executable=(down)
+        append=()
+    elif [[ "$1" == "ps" ]]; then
+        docker_cmd=(docker)
+        service=(compose)
+        executable=(ps)
         append=()
     else
         docker_cmd=(docker exec -it)
@@ -23,9 +28,16 @@ jpt () {
             shift $(expr $OPTIND + 1 )
             executable=(php)
             append+=(artisan "$@")
-        elif [[ "$2" == "php" && "$3" == "artisan" ]]; then
-            shift $(expr $OPTIND + 2 )
-            append+=(php artisan "$@")
+        elif [[ "$2" == "php" ]]; then
+            if [[ "$3" == "artisan" ]]; then
+                shift $(expr $OPTIND + 2 )
+                executable=(php)
+                append+=(artisan "$@")
+            else
+                shift $(expr $OPTIND + 1 )
+                executable=(php)
+                append+=("$@")
+            fi
         elif [[ "$2" == "yarn" ]]; then
             shift $(expr $OPTIND + 1 )
             executable=(yarn)
@@ -53,12 +65,33 @@ jpt () {
         else
             executable=("$2")
             shift $(expr $OPTIND + 1 )
-            append+="$@"
+            append+=("$@")
         fi
     fi
     # echo "${service[@]} ${append[@]}"
     # exit 1;
 
     "${docker_cmd[@]}" "${service[@]}" "${executable[@]}" "${append[@]}"
+
+}
+
+jpt () {
+    if [ "$1" == "artisan" ] || \
+        [ "$1" == "php" ] || \
+        [ "$1" == "yarn" ] || \
+        [ "$1" == "npm" ] || \
+        [ "$1" == "git" ] || \
+        [ "$1" == "composer" ] || \
+        [ "$1" == "pint" ] || \
+        [ "$1" == "phpunit" ] || \
+        [ "$1" == "unit" ]; then
+        command=(jpt_service core)
+        append=("$@")
+    else
+        command=(jpt_service)
+        append=("$@")
+    fi
+
+    "${command[@]}" "${append[@]}"
 
 }

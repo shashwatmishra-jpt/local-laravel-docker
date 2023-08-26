@@ -1,5 +1,22 @@
 # Docker for Laravel on Local
 
+Docker Setup for Laravel applications for ***local development***.
+
+> WARNING: This setup is not suitable for production.
+
+### Services Included:
+
+- **PHP-FPM**
+- **NGINX** (server)
+- **TRAEFIK** (reverse proxy)
+- **SUPERVISOR** (process monitor)
+- **MySQL** (database)
+- **Redis** (key value database)
+- **Memcached** (caching)
+- **Elasticsearch** (search driver for laravel scout)
+- **Mailhog** (email testing)
+- **Minio** (S3 on Local) [optional]
+
 ## Steps to setup
 
 ### Initial Setup
@@ -16,11 +33,12 @@
     ```sh
     git clone git@github.com:organization/frontend-repo.git ./workspace/frontend
     ```
-5. Run the docker up command with build & detached flag:
+5. Edit the `.env` file according to your needs.
+6. Run the docker up command with build & detached flag:
   ```sh
   docker compose up -d --build --remove-orphans
   ```
-6. Enter the core container to:
+7. Enter the core container to:
     - `composer install`
     - setup laravel using:
         - `php artisan key:generate`
@@ -29,7 +47,7 @@
 ```sh
 docker exec -it marketplace2-core sh
 ```
-7. Re-create the Supervisor Worker:
+8. Re-create the Supervisor Worker:
 ```sh
 docker compose stop supervisor
 docker compose rm supervisor
@@ -105,6 +123,28 @@ source ~/.bashrc
 
 ### Commands:
 
+To run these basic commands (below) inside the `core` container you don't need to specify `core` in the command, they can be executed directly. To run them in a different container, you will have to specify a container.
+
+#### Example (on core conatiner):
+
+```sh
+jpt core artisan about
+```
+
+So this would also work, and acts as a shorthand:
+
+```sh
+jpt artisan about
+```
+
+#### Example (on supervisor container)
+
+> Note: Although it's an option, it won't be needed for most use cases.
+
+```sh
+jpt worker artisan about
+```
+
 1. Docker compose up
 
 Proxied: `docker compose up -d --build --remove-orphans`
@@ -126,7 +166,7 @@ jpt down
 Proxied: `docker compose -it exec marketplace2-core php artisan about`
 
 ```sh
-jpt core artisan about
+jpt artisan about
 ```
 
 4. Composer Commands
@@ -134,7 +174,7 @@ jpt core artisan about
 Proxied: `docker compose -it exec marketplace2-core composer install`
 
 ```sh
-jpt core composer install
+jpt composer install
 ```
 
 5. Yarn Commands
@@ -142,29 +182,29 @@ jpt core composer install
 Proxied: `docker compose -it exec marketplace2-core yarn`
 
 ```sh
-jpt core yarn
+jpt yarn
 ```
 
 Proxied: `docker compose -it exec marketplace2-core yarn dev`
 
 ```sh
-jpt core yarn dev
+jpt yarn dev
 ```
 
->(!) Note: The supervisor (worker) container already keep an instance on `yarn dev` running.
+> Note: The supervisor (worker) container already keep an instance on `yarn dev` running. You can control that in `.env` config.
 
 6. PHP Unit
 
 Proxied: `docker compose -it exec marketplace2-core ./vendor/bin/phpunit`
 
 ```sh
-jpt core unit
+jpt unit
 ```
 
 OR
 
 ```sh
-jpt core phpunit
+jpt phpunit
 ```
 
 7. Pint
@@ -172,5 +212,5 @@ jpt core phpunit
 Proxied: `docker compose -it exec marketplace2-core ./vendor/bin/pint`
 
 ```sh
-jpt core pint
+jpt pint
 ```
