@@ -97,7 +97,7 @@ services:
             # - "traefik.http.routers.api.tls=true"
             # - "traefik.http.routers.api.tls.certresolver=default"
         healthcheck:
-            test: ['CMD', './traefik', 'healthcheck', '--ping']
+            test: ['CMD', 'traefik', 'healthcheck', '--ping']
             interval: 10s
             timeout: 10s
             retries: 5
@@ -116,7 +116,7 @@ services:
         ports:
             - '${FORWARD_DB_PORT:-3306}:3306'
         environment:
-            MYSQL_ROOT_PASSWORD: '${DB_PASSWORD}'
+            MYSQL_ROOT_PASSWORD: '${DB_ROOT_PASSWORD}'
             MYSQL_ROOT_HOST: "%"
             MYSQL_DATABASE: '${DB_DATABASE}'
             MYSQL_USER: '${DB_USERNAME}'
@@ -129,7 +129,8 @@ services:
         networks:
             - marketplace2
         healthcheck:
-            test: ["CMD", "mysqladmin", "ping", "-p${DB_PASSWORD}"]
+            test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+            interval: 10s
             retries: 3
             timeout: 5s
     redis:
@@ -170,24 +171,35 @@ services:
         networks:
             - marketplace2
     # This can be used to test AWS S3 OR S3 Compatible Storage Drivers locally
-    # minio:
-    #     image: 'minio/minio:latest'
-    #     container_name: marketplace2-minio
-    #     ports:
-    #         - '${FORWARD_MINIO_PORT:-9000}:9000'
-    #         - '${FORWARD_MINIO_CONSOLE_PORT:-8900}:8900'
-    #     environment:
-    #         MINIO_ROOT_USER: 'marketplace2'
-    #         MINIO_ROOT_PASSWORD: 'password'
-    #     volumes:
-    #         - 'marketplace2-minio:/data/minio'
-    #     networks:
-    #         - marketplace2
-    #     command: minio server /data/minio --console-address ":8900"
-    #     healthcheck:
-    #         test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
-    #         retries: 3
-    #         timeout: 5s
+    minio:
+        image: 'minio/minio:latest'
+        container_name: marketplace2-minio
+        ports:
+            - '${FORWARD_MINIO_PORT:-9000}:9000'
+            - '${FORWARD_MINIO_CONSOLE_PORT:-8900}:8900'
+        environment:
+            MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+            MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+        labels:
+            - "traefik.enable=true"
+            - "traefik.http.routers.minio.rule=Host(`${APP_HOST}`) && PathPrefix(`/`) && !Host(`${TRAEFIK_DASH}`)"
+            # HTTP Scheme
+            - "traefik.http.routers.minio.entrypoints=web"
+            - "traefik.http.routers.minio.tls=false"
+            # Portainer
+            - "traefik.http.routers.minio.middlewares=portainer-prefix"
+            - "traefik.http.middlewares.portainer-prefix.stripprefix.prefixes=/"
+            - "traefik.http.middlewares.portainer-prefix.stripprefix.forceslash=false"
+        volumes:
+            - 'marketplace2-minio:/data/minio'
+        networks:
+            - marketplace2
+        command: minio server /data/minio --console-address ":8900"
+        healthcheck:
+            test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+            interval: 10s
+            retries: 3
+            timeout: 5s
     mailhog:
         image: 'mailhog/mailhog:latest'
         container_name: marketplace2-mailhog

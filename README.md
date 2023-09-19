@@ -2,7 +2,7 @@
 
 Docker Setup for Laravel applications for ***local development***.
 
-> WARNING: This setup is not suitable for production.
+> ***WARNING:*** This setup is not suitable for production.
 
 ### Services Included:
 
@@ -15,7 +15,7 @@ Docker Setup for Laravel applications for ***local development***.
 - **Memcached** (caching)
 - **Elasticsearch** (search driver for laravel scout)
 - **Mailhog** (email testing)
-- **Minio** (S3 on Local) [optional]
+- **Minio** (S3 on Local)
 
 ## Steps to setup
 
@@ -23,17 +23,17 @@ Docker Setup for Laravel applications for ***local development***.
 
 1. Clone this repository.
 2. Create a `backend` and `frontend` folder inside the `workspace` directory.
-3. Copy the example.env as .env on the root & update as required.
+3. Copy this project's example.env as .env & update as required.
 4. Clone the backend (laravel) app in your `backend` folder and frontend app in your `frontend` folder.
-    - Example `backend` using ssh
+    - Example: clone `backend` using ssh
     ```sh
     git clone git@github.com:organization/backend-repo.git ./workspace/backend
     ```
-    - Example `frontend` using ssh
+    - Example: clone `frontend` using ssh
     ```sh
     git clone git@github.com:organization/frontend-repo.git ./workspace/frontend
     ```
-5. Edit the `.env` file according to your needs.
+5. Edit the backend & frontend `.env` files according to your needs.
 6. Run the docker up command with build & detached flag:
   ```sh
   docker compose up -d --build --remove-orphans
@@ -65,6 +65,7 @@ docker compose up -d
  ✔ Container marketplace2-redis          Started
  ✔ Container marketplace2-db             Started
  ✔ Container marketplace2-mailhog        Started
+ ✔ Container marketplace2-minio          Started
  ✔ Container marketplace2-reverse-proxy  Started
  ✔ Container marketplace2-core           Started
  ✔ Container marketplace2-engine         Started
@@ -93,7 +94,28 @@ docker compose up -d --remove-orphans
 docker exec -it marketplace2-core sh
 ```
 
+## Access URLs
+
+1. **Application:**
+    - URL Scheme: `{APP_HOST}:{FORWARD_TRAEFIK_PORT}`
+    - Example: `http://localhost`
+
+2. **Minio Console:**
+    - URL Scheme: `{MINIO_HOST}:{FORWARD_MINIO_CONSOLE_PORT}`
+    - Example: `http://localhost:8900`
+
+3. **MailHog Dashboard:**
+    - URL Scheme: `{APP_HOST}:{FORWARD_MAILHOG_DASHBOARD_PORT}`
+    - Example: `http://localhost:8025`
+
+4. **Traefik Dashboard:**
+    - URL Scheme: `{TRAEFIK_DASH}:{FORWARD_TRAEFIK_DASH_PORT}/dashboard`
+    - Example: `http://localhost:8080/dashboard`
+
+
 ## Use `jpt` Command (linux)
+
+> **Note:** This might also work on MacOS (not tested)
 
 Instead of going inside the container interactively every time, then running the desired command, You can use command `jpt` to run commands directly:
 
@@ -191,7 +213,7 @@ Proxied: `docker compose -it exec marketplace2-core yarn dev`
 jpt yarn dev
 ```
 
-> Note: The supervisor (worker) container already keep an instance on `yarn dev` running. You can control that in `.env` config.
+> **Note:** The supervisor (worker) container already keep an instance on `yarn dev` running. You can control that in `.env` config.
 
 6. PHP Unit
 
